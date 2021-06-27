@@ -7,3 +7,5 @@
 *.dae
 data/*
 logs/*
+data
+.vscode
