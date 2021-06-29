@@ -104,7 +104,7 @@ class colmapFormat(object):
             capture['R'] = self.quaternionToRotationMatrix(
                 capture['QW'], capture['QX'], capture['QY'], capture['QZ'])
             capture['T'] = np.array([capture['TX'], capture['TY'], capture['TZ']])
-            capture['extrinsic'] = np.concatenate([capture['R'], capture['T'].reshape(-1, 1)], axis=1)
+            capture['extrinsic'] = np.concatenate([capture['R'].T, capture['T'].reshape(-1, 1)], axis=1)
             capture['extrinsic'] = np.concatenate([capture['extrinsic'], np.array([0, 0, 0, 1]).reshape(1, -1)], axis=0)
 
 

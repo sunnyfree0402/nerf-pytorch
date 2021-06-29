@@ -1,5 +1,7 @@
 import numpy as np
 import os, imageio
+import shutil
+from PIL import Image
 
 
 ########## Slightly modified version of LLFF data loading code 
@@ -19,7 +21,8 @@ def _minify(basedir, factors=[], resolutions=[]):
         return
     
     from shutil import copy
-    from subprocess import check_output
+    from subprocess import check_output, CalledProcessError
+    from pathlib import PureWindowsPath
     
     imgdir = os.path.join(basedir, 'images')
     imgs = [os.path.join(imgdir, f) for f in sorted(os.listdir(imgdir))]
@@ -31,10 +34,8 @@ def _minify(basedir, factors=[], resolutions=[]):
     for r in factors + resolutions:
         if isinstance(r, int):
             name = 'images_{}'.format(r)
-            resizearg = '{}%'.format(100./r)
         else:
             name = 'images_{}x{}'.format(r[1], r[0])
-            resizearg = '{}x{}'.format(r[1], r[0])
         imgdir = os.path.join(basedir, name)
         if os.path.exists(imgdir):
             continue
@@ -42,8 +43,28 @@ def _minify(basedir, factors=[], resolutions=[]):
         print('Minifying', r, basedir)
         
         os.makedirs(imgdir)
-        check_output('cp {}/* {}'.format(imgdir_orig, imgdir), shell=True)
-        
+        # """ python alternative that can work on windows
+        for item in os.listdir(imgdir_orig):
+            if any([item.endswith(ex) for ex in ['JPG', 'jpg', 'png', 'jpeg', 'PNG']]):
+                im = Image.open(os.path.join(imgdir_orig, item))
+                if isinstance(r, int):
+                    r = [x // r for x in im.size[:2]]
+                im = im.resize(r)
+                im.save(os.path.join(imgdir, item.split('.')[-2] + ".png"))
+        # """
+
+        """ These were built for Linux shell, does not work on windows
+        if isinstance(r, int):
+            name = 'images_{}'.format(r)
+            resizearg = '{}%'.format(100./r)
+        else:
+            name = 'images_{}x{}'.format(r[1], r[0])
+            resizearg = '{}x{}'.format(r[1], r[0])
+        try:
+            check_output('copy {}\* {}'.format(PureWindowsPath(imgdir_orig), PureWindowsPath(imgdir)), shell=True)
+        except CalledProcessError as e:
+            raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+
         ext = imgs[0].split('.')[-1]
         args = ' '.join(['mogrify', '-resize', resizearg, '-format', 'png', '*.{}'.format(ext)])
         print(args)
@@ -52,11 +73,10 @@ def _minify(basedir, factors=[], resolutions=[]):
         os.chdir(wd)
         
         if ext != 'png':
-            check_output('rm {}/*.{}'.format(imgdir, ext), shell=True)
+            check_output('rm {}/*.{}'.format(PureWindowsPath(imgdir), ext), shell=True)
             print('Removed duplicates')
         print('Done')
-            
-        
+        """
         
         
 def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
