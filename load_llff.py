@@ -26,7 +26,7 @@ def _minify(basedir, factors=[], resolutions=[]):
     
     imgdir = os.path.join(basedir, 'images')
     imgs = [os.path.join(imgdir, f) for f in sorted(os.listdir(imgdir))]
-    imgs = [f for f in imgs if any([f.endswith(ex) for ex in ['JPG', 'jpg', 'png', 'jpeg', 'PNG']])]
+    imgs = [f for f in imgs if any([f.endswith(ex) for ex in ['JPG', 'jpg', 'JPEG', 'png', 'jpeg', 'PNG']])]
     imgdir_orig = imgdir
     
     wd = os.getcwd()
@@ -45,7 +45,7 @@ def _minify(basedir, factors=[], resolutions=[]):
         os.makedirs(imgdir)
         # """ python alternative that can work on windows
         for item in os.listdir(imgdir_orig):
-            if any([item.endswith(ex) for ex in ['JPG', 'jpg', 'png', 'jpeg', 'PNG']]):
+            if any([item.endswith(ex) for ex in ['JPG', 'jpg', 'JPEG', 'png', 'jpeg', 'PNG']]):
                 im = Image.open(os.path.join(imgdir_orig, item))
                 if isinstance(r, int):
                     r = [x // r for x in im.size[:2]]
@@ -86,7 +86,7 @@ def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
     bds = poses_arr[:, -2:].transpose([1,0])
     
     img0 = [os.path.join(basedir, 'images', f) for f in sorted(os.listdir(os.path.join(basedir, 'images'))) \
-            if f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')][0]
+            if f.endswith('JPG') or f.endswith('jpg') or f.endswith('JPEG') or f.endswith('png')][0]
     sh = imageio.imread(img0).shape
     
     sfx = ''
